@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--配置文件方式开启注解包扫描,只有配置了这个选项spring框架的注解才会生效,相当于@ComponentScan("com.itheima")-->
+    <context:component-scan base-package="cn.itcast"/>
+
+    <!--加载外部配置文件,相当于@PropertySource("classpath:jdbc.properties")-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置文件方式开启事物的注解驱动,只有开启这个配置,事物注解才会生效,相当于@EnableTransactionManagemen-->
+    <tx:annotation-driven/>
+
+    <!--配置文件方式开启AOP通知的注解驱动,只有开启这个配置,AOP切面注解才会生效,相当于@EnableAspectJAutoProxy-->
+    <aop:aspectj-autoproxy/>
+
+    <!--实例化事物管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理器对哪些方法进行事物管理,如果是注解就不需要了-->
+    <tx:advice id="tx" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--tx:method:配置哪些方法进行事务管理-->
+            <!--name:配置的方法名,可以使用*通配符,save*:表示所有以save开头的方法-->
+            <!--propagation:配置传播级别,REQUIRED:使用事务,SUPPORTS:不使用事务-->
+            <!--read-only:是否只读,查询的不进行数据库写操作的,设置为只读-->
+            <!--增删改需要设置为false-->
+            <!--isolation:事务的隔离级别,一般使用默认的-->
+            <!--rollback-for:设置什么异常才回滚事务,其他异常不回滚-->
+            <!--no-rollback-for:设置什么异常不回滚.其他异常回滚-->
+            <!--timeout:超时时间,如果为-1,表示不设置超时 时间-->
+            <tx:method name="save*" isolation="DEFAULT" read-only="false" propagation="REQUIRED"/>
+            <tx:method name="transMoney*" read-only="false" propagation="REQUIRED"/>
+            <tx:method name="udpate*" read-only="false" propagation="REQUIRED"/>
+            <tx:method name="delete*" read-only="false" propagation="REQUIRED"/>
+            <!--以上进行事务管理,以下不进行事务管理-->
+            <tx:method name="query*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="find*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="get*" read-only="true" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--事物管理切面,配置声明地方使用事物管理-->
+    <aop:config>
+        <aop:advisor advice-ref="tx" pointcut="execution(* cn.itcast.mapper.*.*(..))"/>
+    </aop:config>
+
+    <!--实例化自定义aop通知类-->
+    <bean id="aopMethod" class="cn.itcast.model.AopMethod"/>
+
+    <!--自定义aop通知切面-->
+    <aop:config>
+        <aop:aspect id="aop" ref="aopMethod">
+            <aop:after method="after" pointcut="execution(* cn.itcast.mapper.*.*(..))"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>

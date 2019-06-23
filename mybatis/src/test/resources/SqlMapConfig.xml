@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--MyBatis的SqlMapConfig.xml的核心配置文件的内容是有顺序的,-->
+    <!--可以按住Ctrl键不放点击configuration标签,就可以看到内容和顺序了-->
+    <!--resource:加载外部配置文件-->
+    <properties resource="db.properties">
+        <!--配置内部属性-->
+        <property name="driver" value="com.mysql.jdbc.Driver"/>
+    </properties>
+
+    <!--配置开启全局延迟加载-->
+    <settings>
+        <setting name="lazyLoadingEnabled" value="true"/>
+    </settings>
+    
+    <!--配置类型别名-->
+    <typeAliases>
+        <!--type:要对哪一个类型起别名-->
+        <!--alias:别名叫什么,别名是不区分大小写-->
+        <!--<typeAlias type="com.itheima.pojo.User" alias="user"/>-->
+        <!--别名扫描包-->
+        <!--扫描包里面所有的类,起别名,别名就是类名-->
+        <package name="cn.itcast.model"/>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <!--数据库配置-->
+                <property name="driver" value="${driver}" />
+                <property name="url" value="${url}" />
+                <property name="username" value="${username}" />
+                <property name="password" value="${password}" />
+            </dataSource>
+        </environment>
+    </environments>
+    <!--SqlMapConfig.xml:就是MyBatis的核心配置文件-->
+    <!--配置需要加载的Mapper.xml映射文件-->
+    <mappers>
+        <!--resource:需要加载的映射文件的文件地址-->
+        <!--<mapper resource="mapper/UserMapper.xml"/>-->
+        <!--使用类加载的方式加载资源-->
+        <!--前提1:名字一致,前提2:目录一致(在一起)-->
+        <!--<mapper class="com.itheima.mapper.UserDao"/>-->
+        <!--package使用包扫描的方式加载资源-->
+        <!--前提1:名字一致,前提2:目录一致(在一起)-->
+        <package name="cn.itcast.mapper"/>
+    </mappers>
+</configuration>    

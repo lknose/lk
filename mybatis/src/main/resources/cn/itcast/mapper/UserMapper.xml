@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.mapper.UserMapper"><!-- 必须要写要映射的dao全限定名-->
+    <select id="dad" parameterType="user" resultType="user">
+        select * from user
+        <!--where标签就不需要在sql中写 where,并且会处理拼接的第一个and-->
+        <where>
+            <if test="name!=null and uname!=''">
+                and name = #{name}
+            </if>
+            <if test="psd!=null or psd!=''">
+                and psd = #{psd}
+            </if>
+        </where>
+    </select>
+
+    <select id="asd" parameterType="queryVo" resultType="user">
+        select
+        <include refid="akl"/>
+        from um_user
+        <where>
+            <if test="ids!=null and ids.size>0">
+                <foreach collection="ids" item="id" open="and id in(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- sql代码片段,在需要使用的sql语句中加上 <include refid="akl"/> 引入-->
+    <sql id="akl">
+        id,name,pasd
+    </sql>
+
+    <!-- 表示在这个映射文件范围内开启二级缓存,
+    使用二级缓存需要实体类实现序列化接口,
+    在需要开启二级缓存的地方加上 useCache="true"-->
+    <cache/>
+
+    <insert id="saveUser" parameterType="user">
+        <!--返回主键自增,order是之前还是之后,应该是查询之后在执行-->
+        <selectKey keyProperty="id" keyColumn="id" order="AFTER" resultType="int">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+
+    <!--id对应的是映射的dao的方法名必须一致,parameterType是传入的参数类型,
+    resultType是结果集映射的类型-->
+    <select id="queryUserAll" resultMap="kl" useCache="true">
+        select u.*,a.id aid,a.code,a.money from user u,account a,user_account ua
+        where u.id = ua.uid and a.id = ua.aid
+    </select>
+
+    <!--resultMap结果集映射,id对应select标签里的resultMap名称
+    type是结果集最终映射的实体类,autoMapping是开启自动映射-->
+    <resultMap id="lk" type="user" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="pasd" column="pasd"/>
+        <!--association是一对一,collection是一对多
+        javaTypes是返回值类型list,ofType是返回的集合里面的元素类型 -->
+        <collection property="accounts" javaType="" ofType="account" autoMapping="true">
+            <id property="id" column="aid"/>
+            <result property="code" column="code"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="kl" type="user" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="pasd" column="pasd"/>
+        <!--一对多的延迟加载,column是延迟加载方法要使用的参数,
+        select是指定用哪个接口的方法延迟加载-->
+       <collection property="accounts" ofType="account" column="id"
+                   select="cn.itcast.mapper.AccountMapper.queryAccountByUserId"/>
+    </resultMap>
+
+</mapper>

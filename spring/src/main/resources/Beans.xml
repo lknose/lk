@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+
+    <bean id="Driver" class="com.mysql.jdbc.Driver" scope="singleton"
+          init-method="getParentLogger" destroy-method="getParentLogger" factory-method="aspectOf"/>
+
+    <bean id="Date" class="java.util.Date"/>
+
+    <bean id="User" class="cn.itcast.model.User">
+        <property name="name" value="里番"/>
+        <property name="password" value="119"/>
+        <property name="sr" ref="Date"/>
+    </bean>
+
+    <bean id="Cbs" class="cn.itcast.model.Cbs">
+        <constructor-arg name="array">
+            <array>
+                <value>100</value>
+                <bean class="java.util.Date"/>
+                <ref bean="Date"/>
+            </array>
+        </constructor-arg>
+        <constructor-arg name="list">
+            <list>
+                <value>100</value>
+                <ref bean="Date"/>
+                <bean class="java.util.Date"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="set">
+            <set>
+                <value>s</value>
+                <bean class="java.util.Date"/>
+                <ref bean="Date"/>
+            </set>
+        </constructor-arg>
+        <constructor-arg name="map">
+            <map>
+                <entry key="nm" value="sl"/>
+                <entry key="date" value-ref="Date"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+</beans>
